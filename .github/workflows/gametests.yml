@@ -1,10 +1,15 @@
-name: build
+name: Build
 on:
   push:
     paths:
-      - 'common/src/main/java/**'
-      - 'fabric/src/main/java/**'
-      - 'neoforge/src/main/java/**'
+      - 'common/**'
+      - 'fabric/**'
+      - 'neoforge/**'
+      - 'sable_rapier/**'
+      - 'buildSrc/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
       - '**/gradle.properties'
       - '**/settings.gradle'
       - '**/build.gradle'
@@ -12,20 +17,30 @@ on:
   pull_request:
     branches:
       - 'main'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: 21
-          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -34,7 +49,33 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Execute Gradle build
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon --stacktrace
+
+      - name: Upload Fabric JAR
+        uses: actions/upload-artifact@v7
+        with:
+          name: sable-fabric
+          path: |
+            fabric/build/libs/sable-fabric-*.jar
+            !fabric/build/libs/*-sources.jar
+            !fabric/build/libs/*-dev.jar
+            !fabric/build/libs/*-javadoc.jar
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Upload NeoForge JAR
+        uses: actions/upload-artifact@v7
+        with:
+          name: sable-neoforge
+          path: |
+            neoforge/build/libs/sable-neoforge-*.jar
+            !neoforge/build/libs/*-sources.jar
+            !neoforge/build/libs/*-dev.jar
+            !neoforge/build/libs/*-javadoc.jar
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
 
       - name: Run game tests
-        run: ./gradlew neoforge:runGameTest
+        run: ./gradlew neoforge:runGameTest --no-daemon --stacktrace

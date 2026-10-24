@@ -29,6 +29,12 @@ View the [Sable Developer Wiki](https://github.com/ryanhcode/sable/wiki) for doc
 
 Join sable zone for development discussion: https://discord.gg/pnkzu2dtVA
 
+# Downloading CI Builds
+
+Open the repository's **Actions** tab and select the **Build** workflow. It runs on code and build configuration changes, pull requests to `main`, and manually via **Run workflow**.
+
+Once the build step succeeds, open the workflow run and download `sable-fabric` or `sable-neoforge` from **Artifacts**. Extract the ZIP and use the JAR for your mod loader. Artifacts are retained for 30 days, subject to the repository's retention policy. These builds do not publish a release.
+
 # Building Rust Natives
 
 1. Install Docker from https://www.docker.com/get-started/ or from your relevant package manager

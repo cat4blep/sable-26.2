@@ -60,12 +60,12 @@ tasks.named('sourcesJar', Jar) {
 publishMods {
     def isFabric = project.name == "fabric"
     def loaderName = isFabric ? "Fabric" : "NeoForge"
-    def changelogFile = rootProject.file("changelog.md")
+    def changelogFile = rootProject.layout.projectDirectory.file("changelog.md")
 
     type = STABLE
 
     file = isFabric ? project.tasks.remapJar.archiveFile : jar.archiveFile
-    changelog = changelogFile.text
+    changelog = providers.fileContents(changelogFile).asText
 
     version = "$project.version+mc$minecraft_version"
     displayName = "$mod_name $loaderName $project.version for mc$minecraft_version"
